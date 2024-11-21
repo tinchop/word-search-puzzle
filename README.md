@@ -26,3 +26,4 @@ In this iteration we will create the first version of the puzzle, which will be 
 - The list of words to find should be shown above the grid.
 - Every time the program is ran, the words should appear in different positions (do not hardcode a solution).
 - Words can overlap, but in 1 character only.
+- As always, create a new branch from `main` for this iteration. The branch name should be `iteration-1`. Remember to keep the format `IX - Description` in commit messages, where X is the iteration number.
