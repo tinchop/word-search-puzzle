@@ -3,95 +3,108 @@ import random
 print("Welcome to the Word Search Puzzle!")
 print("Let's start!")
 
+def is_space_available(word, empty_board, row, col, direction):  
+    if direction == 0: 
+        if col + len(word) > len(empty_board[0]): 
+            return False
+        else:
+            for l in range(len(word)):
+                if empty_board[row][col + l] not in ["_", word[l]]:
+                    return False
+    
+    elif direction == 1:  
+        if row + len(word) > len(empty_board): 
+            return False
+        else:
+            for l in range(len(word)):
+                if empty_board[row + l][col] not in ["_", word[l]]:
+                    return False
+    
+    elif direction == 2:  
+        if row + len(word) > len(empty_board) or col + len(word) > len(empty_board[0]):
+            return False
+        else:
+            for l in range(len(word)):
+                if empty_board[row + l][col + l] not in ["_", word[l]]:
+                    return False
+    
+    else:  
+        if row - len(word) < -1 or col - len(word) < -1:
+            return False
+        else:
+            for l in range(len(word)):
+                if empty_board[row - l][col - l] not in ["_", word[l]]:
+                    return False
+    
+    return True
 
 def place_word(word, empty_board):
     placed = False
-    while not placed:
-        pos = random.randint(0,3) #posicion: 0 horizontal, 1 vertical, 2 diagonal_der, 3 diag_izq
+    max_attempts = 100
+    attempts = 0
+    while not placed and attempts < max_attempts:
+        reverse = random.randint(0, 1)
+        if reverse:
+            word = word[::-1]
 
-        if pos == 0:   #es horizontal
-            row = random.randint(0, len(empty_board)-1)
-            col = random.randint(0, (len(empty_board[0])-len(word)))
+        pos = random.randint(0, 3)  # 0 horizontal, 1 vertical, 2 diag_right, 3 diag_left
+        #position
+        if pos == 0:  # horizontal
+            row = random.randint(0, len(empty_board) - 1)
+            col = random.randint(0, len(empty_board[0]) - len(word))
+        
+        elif pos == 1:  # Vertical
+            row = random.randint(0, len(empty_board) - len(word))
+            col = random.randint(0, len(empty_board[0]) - 1)
+        
+        elif pos == 2:  #diag_right
+            row = random.randint(0, len(empty_board) - len(word))
+            col = random.randint(0, len(empty_board[0]) - len(word))
+        
+        else:  # diag_left
+            row = random.randint(len(word) - 1, len(empty_board) - 1)
+            col = random.randint(len(word) - 1, len(empty_board[0]) - 1)
 
-            reverse = random.randint(0,1)
-            if reverse:
-                word = word[::-1]
-
-            aval = all(empty_board[row][col+l] in ["_", word[l]] for l in range(len(word)))
-            
-            if aval:
-                for l in word:
-                    empty_board[row][col] = word[0]
-                    empty_board[row][col+1] = word[1]
-                    empty_board[row][col+2] = word[2]
+        if is_space_available(word, empty_board, row, col, pos):
+            if pos == 0:  
+                for l in range(len(word)):
+                    empty_board[row][col + l] = word[l]
+            elif pos == 1:  
+                for l in range(len(word)):
+                    empty_board[row + l][col] = word[l]
+            elif pos == 2:  
+                for l in range(len(word)):
+                    empty_board[row + l][col + l] = word[l]
+            else:  
+                for l in range(len(word)):
+                    empty_board[row - l][col - l] = word[l]
             placed = True
         
-        elif pos == 1: #es vertical
-            row = random.randint(0, (len(empty_board)-len(word)))
-            col = random.randint(0, len(empty_board)-1)
-            reverse = random.randint(0,1)
-            if reverse:
-                word = word[::-1]
-            
-            aval = all(empty_board[row+l][col] in ["_", word[l]] for l in range(len(word)))
-            if aval:
-                for l in word:
-                    empty_board[row][col] = word[0]
-                    empty_board[row+1][col] = word[1]
-                    empty_board[row+2][col] = word[2]
-            placed = True
-        
-        elif pos == 2: #diagonal der  
-            row = random.randint(0, len(empty_board)-len(word)-1)
-            col = random.randint(0, len(empty_board)-len(word)-1)
+        attempts += 1
 
-            reverse = random.randint(0,1)
-            if reverse:
-                word = word[::-1]
+    if not placed:
+        print(f"Words out of board: {word}")
 
-            aval = all(empty_board[row+l][col+l] in ["_", word[l]] for l in range(len(word)))
-            if aval:
-                empty_board[row][col] = word[0]
-                empty_board[row+1][col+1] = word[1]
-                empty_board[row+2][col+2] = word[2]
-            placed = True
-
-        else:
-            
-            row = random.randint(0+len(word), len(empty_board)-1)
-            col = random.randint(0+len(word), len(empty_board)-1)
-
-            reverse = random.randint(0,1)
-            if reverse:
-                word = word[::-1]
-
-            aval = all(empty_board[row-l][col-l] in ["_", word[l]] for l in range(len(word)))
-            if aval:
-                empty_board[row][col] = word[0]
-                empty_board[row-1][col-1] = word[1]
-                empty_board[row-1][col-2] = word[2]
-            placed = True      
 
 def fill_board(empty_board, letters):
     for r in range(len(empty_board)):
-        for c in range(len(empty_board)):
-            if empty_board[r][c]== "_":
-                empty_board[r][c]=random.choice(letters)
+        for c in range(len(empty_board[0])):
+            if empty_board[r][c] == "_":
+                empty_board[r][c] = random.choice(letters)
 
 
 def create_word_search_puzzle(words_to_find):
-    empty_board = [["_" for elem in range(colums)] for e in range(rows)]
+    empty_board = [["_" for _ in range(columns)] for _ in range(rows)]
     
     for word in words_to_find:
         place_word(word, empty_board) 
 
-    fill_board(empty_board,letters)
+    fill_board(empty_board, letters)
     return empty_board
     
-rows = 5
-colums = 5
+rows, columns = 5, 5
 
-words_to_find = ["CAT", "DOG", "BIRD", "HAT" ,"BAT"]
+words_to_find = ["CAT", "DOG", "BIRD", "HAT", "BAT"]
 
 letters = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
 
@@ -100,5 +113,5 @@ random.shuffle(words_to_find)
 print(words_to_find)
 
 board = create_word_search_puzzle(words_to_find)
-for f in board:
-    print(*f)
+for row in board:
+    print(" ".join(row))
